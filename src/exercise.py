@@ -59,6 +59,8 @@ spend more time reading docs to proprely understand
 - register decorator 
 """
 
+# ensure _ExerciseCtor's in registry all have **kwargs and return an Exercise
+# type hint, won't ever use foo = __ExerciseCtor()
 class _ExerciseCtor(Protocol):
     def __call__(self, **kwargs) -> Exercise: ...
 
@@ -74,8 +76,9 @@ class ExerciseFactory:
         return _decorator
     
     @classmethod
-    #interestimg technique: / forces lhs arguments to be position and rhs to be 
-    # keywords ! so no confusion between kind passed and dict of arguments expected by 
+    #interestimg technique: / is a "placeholder" which forces 
+    # lhs arguments to be position and rhs to be keywords ! 
+    # so no confusion between kind passed and dict of arguments expected by 
     # specific exercise rule
     def create(cls, kind: ExerciseType, /, **kwargs) -> Exercise:
         try:
