@@ -1,11 +1,16 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import datetime as dt
-from src.bookkeeping import ExerciseType
 from typing import Protocol
+import enum
 
 # TODO
 # make business days adjustments
+
+class ExerciseType(enum.Enum):
+    EUROPEAN = enum.auto()
+    AMERICAN = enum.auto()
+    BERMUDAN = enum.auto()
 
 
 class Exercise(ABC):
@@ -52,11 +57,11 @@ class BermudanExercise(Exercise):
     def exercise_dates(self) -> tuple[dt.date, ...]:
         return self.dates
 
-# TODO
+
 """
-spend more time reading docs to proprely understand 
-- Protocol
-- register decorator 
+***************************************************************************************
+Factory
+***************************************************************************************
 """
 
 # ensure _ExerciseCtor's in registry all have **kwargs and return an Exercise
