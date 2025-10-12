@@ -5,7 +5,6 @@ from src.option import Option
 
 from src.pricers.types import Market
 
-@dataclass
 class Pricer(ABC):
 
     @abstractmethod
