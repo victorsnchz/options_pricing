@@ -72,7 +72,7 @@ class PayoffFactory:
             return ctor(direction = direction, **kwargs)
         except TypeError as e:
             raise ValueError(f"Error constructing {kind.name}: {e}") from None
-        
+       
 @PayoffFactory.register(PayoffType.VANILLA)
 def _make_vanilla(*, direction: Direction, **kwargs) -> Payoff:
     return VanillaPayoff(direction=direction)

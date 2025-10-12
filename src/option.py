@@ -1,24 +1,16 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 import dataclasses
-import datetime
 
-from src.bookkeeping import OptionType, PayoffType, ExerciseType
+from src.exercise import Exercise
+from src.payoff import Payoff, PayoffContext
 
-@dataclasses.dataclass(frozen = True)
+
+@dataclasses.dataclass(frozen = True, slots = True)
 class Option(ABC):
-
-    expiry: datetime.date
     strike: float
-    
-    payoff_type: PayoffType
-    exercise_type: ExerciseType
+    exercise: Exercise
+    payoff: Payoff
 
-@dataclasses.dataclass(frozen = True)
-class Put(Option):
-    pass
-
-@dataclasses.dataclass(frozen = True)
-class Call(Option):
-    pass
-
-    
+    @abstractmethod
+    def payoff_value(self, context: PayoffContext) -> float: 
+        return self.payoff.value(self.strike, context)
