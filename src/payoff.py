@@ -1,20 +1,31 @@
-from abc import ABC
 import dataclasses
+from abc import ABC, abstractmethod
+from direction import Direction
 
-from src.bookkeeping import Payoff
+@dataclasses.dataclass(frozen=True)
+class PayoffContext:
+    spot: float
+    path: tuple[float] | None = None
 
-@dataclasses(frozen = True)
+@dataclasses.dataclass(frozen=True)
 class Payoff(ABC):
-    pass
+    direction: Direction  # CALL or PUT
 
-@dataclasses.dataclass(frozen=True)
+    @abstractmethod
+    def value(self, strike: float, ctx: PayoffContext) -> float:
+        ...
+
+@dataclasses.dataclass(frozen=True, slots=True)
 class Vanilla(Payoff):
-    pass
 
-@dataclasses.dataclass(frozen=True)
-class Asian(Payoff):
-    pass
+    def value(self, strike: float, ctx: PayoffContext) -> float: 
+        return max(0.0, self.direction.value * (strike - ctx.spot))
+    
+@dataclasses.dataclass(frozen=True, slots=True)
+class AsianArithmeticPayoff(Payoff):
 
-@dataclasses.dataclass(frozen=True)
-class Barrier(Payoff):
-    pass
+    # can now implement independently more payoffs at wills
+
+    def value(self, strike: float, ctx: PayoffContext) -> float: 
+        pass
+    
