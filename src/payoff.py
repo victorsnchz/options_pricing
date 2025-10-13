@@ -52,7 +52,7 @@ class _PayoffCtor(Protocol):
 
 class PayoffFactory:
 
-    _registry = dict[PayoffType, _PayoffCtor] = {}
+    _registry: dict[PayoffType, _PayoffCtor] = {}
 
     @classmethod
     def register(cls, key: PayoffType):
