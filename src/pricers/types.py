@@ -11,3 +11,10 @@ class Market:
     today: dt.date
     basis: str = 'ACT/365'
 
+@dataclass(frozen=True, slots = True)
+class Greeks:
+    delta: float
+    gamma: float
+    vega: float
+    theta: float
+    rho: float
