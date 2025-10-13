@@ -68,7 +68,7 @@ class BlackScholesPricer(Pricer):
         if tau == 0.0 or sigma == 0.0:
             return Greeks(delta = None, gamma = None, vega = None, theta = None, rho = None)
         
-        sig_sqrt_t, d1, d2, disc_q, disc_r = self.compute_bs_quantities(S, K, r, q, sigma, tau)
+        sig_sqrt_t, d1, d2, disc_q, disc_r = self.compute_bs_quantities(S, K, tau, r, q, sigma)
         
         if is_call:
             delta = disc_q * norm.cdf(d1)
