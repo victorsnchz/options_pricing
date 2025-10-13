@@ -9,6 +9,23 @@ class PayoffContext:
     spot: float
     path: tuple[float] | None = None
 
+    def __post_init__(self):
+        
+        if not type(self.spot) == float: 
+            raise TypeError(f'spot must be float not {type(self.spot)}')
+        
+        if self.spot <  0: 
+            raise ValueError(f'spot value must be positive')
+        
+        if self.path is not None and not type(self.path) == tuple:
+            raise TypeError(f'path must be a tuple')
+        
+        if self.path is not None and not all(isinstance(x, float) for x in self.path):
+            raise TypeError(f'all elements in path must be of type float')
+        
+        if self.path is not None and not all(x >= 0 for x in self.path):
+            raise ValueError(f'all values in path must be positive')
+
 @dataclasses.dataclass(frozen=True)
 class Payoff(ABC):
     direction: Direction  # CALL or PUT
