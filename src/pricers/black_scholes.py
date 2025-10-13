@@ -32,7 +32,7 @@ class BlackScholesPricer(Pricer):
         q = float(market.div)
         sigma = float(market.vol)
         tau = max(0.0, year_fraction(market.today, option.exercise.expiry, market.basis))
-        is_call = (option.direction() is Direction.CALL)
+        is_call = (option.direction is Direction.CALL)
 
         return S, K, r, q, sigma, tau, is_call
     
@@ -91,5 +91,3 @@ class BlackScholesPricer(Pricer):
 
     def price_and_greeks(self, option: Option, market: Market) -> tuple[float, Greeks]:
         return self._price_impl(option, market), self.greeks(option, market)
-
-        
