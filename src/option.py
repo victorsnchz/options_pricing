@@ -7,6 +7,9 @@ from src.direction import Direction
 
 @dataclasses.dataclass(frozen = True, slots = True)
 class Option:
+
+    #TODO 
+    # add hashable id to identify unique options?
     
     strike: float
     exercise: Exercise
