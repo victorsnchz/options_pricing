@@ -31,7 +31,7 @@ class EuropeanExercise(Exercise):
     # could make case that t >= expiry?
     def can_exercise(self, t: dt.date) -> bool : return t == self.expiry
 
-    def exercise_dates(self) -> tuple[dt.dates, ...] : return (self.expiry,)
+    def exercise_dates(self) -> tuple[dt.date, ...] : return (self.expiry,)
 
 @dataclass(frozen=True, slots = True)
 class AmericanExercise(Exercise):
@@ -43,11 +43,11 @@ class AmericanExercise(Exercise):
     # stricly enforced...
     def can_exercise(self, t: dt.date) -> bool: return self.start <= t <= self.expiry
     
-    def exercise_dates(self) -> tuple[dt.dates, ...]: 
+    def exercise_dates(self) -> tuple[dt.date, ...]: 
         return tuple(dt.date.fromordinal(o) for o in range(self.start.toordinal(), 
                                                            self.expiry.toordinal()+1))
     
-@dataclass(fronze=True, slots=True)
+@dataclass(frozen=True, slots=True)
 class BermudanExercise(Exercise):
     
     dates: tuple[dt.date,... ]
@@ -71,7 +71,7 @@ class _ExerciseCtor(Protocol):
 
 class ExerciseFactory:
 
-    _registry = dict[ExerciseType, _ExerciseCtor] = {}
+    _registry: dict[ExerciseType, _ExerciseCtor] = {}
 
     @classmethod
     def register(cls, key: ExerciseType):
