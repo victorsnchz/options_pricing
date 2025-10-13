@@ -21,7 +21,7 @@ class Payoff(ABC):
 class VanillaPayoff(Payoff):
 
     def value(self, strike: float, ctx: PayoffContext) -> float: 
-        return max(0.0, self.direction.value * (strike - ctx.spot))
+        return max(0.0, self.direction.value * (ctx.spot - strike))
     
 @dataclasses.dataclass(frozen=True, slots=True)
 class AsianArithmeticPayoff(Payoff):
