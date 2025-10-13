@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 import dataclasses
 
 from src.exercise import Exercise
@@ -7,13 +6,12 @@ from src.direction import Direction
 
 
 @dataclasses.dataclass(frozen = True, slots = True)
-class Option(ABC):
+class Option:
     
     strike: float
     exercise: Exercise
     payoff: Payoff
 
-    @abstractmethod
     def payoff_value(self, context: PayoffContext) -> float: 
         return self.payoff.value(self.strike, context)
     
