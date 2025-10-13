@@ -32,6 +32,15 @@ class TestPayoffVanilla(unittest.TestCase):
         self.assertEqual(payoff.value(strike=101.0, ctx = self.payoff_context), 0)
         self.assertEqual(payoff.value(strike=99.0, ctx = self.payoff_context), 1.0)
 
+    def test_value_put_vanilla(self):
+        
+        direction = Direction.PUT
+        payoff = self.factory.create(PayoffType.VANILLA, direction)
+
+        self.assertEqual(payoff.value(strike=100.0, ctx = self.payoff_context), 0)
+        self.assertEqual(payoff.value(strike=101.0, ctx = self.payoff_context), 1.0)
+        self.assertEqual(payoff.value(strike=99.0, ctx = self.payoff_context), 0)
+
 
 if __name__ == '__main__':
     unittest.main()
