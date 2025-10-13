@@ -2,6 +2,7 @@ import dataclasses
 from abc import ABC, abstractmethod
 import enum
 from typing import Protocol
+from src.direction import Direction
 
 @dataclasses.dataclass(frozen=True)
 class PayoffContext:

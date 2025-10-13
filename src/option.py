@@ -2,7 +2,8 @@ from abc import ABC, abstractmethod
 import dataclasses
 
 from src.exercise import Exercise
-from src.payoff import Payoff, PayoffContext, Direction
+from src.payoff import Payoff, PayoffContext
+from src.direction import Direction
 
 
 @dataclasses.dataclass(frozen = True, slots = True)
