@@ -1,6 +1,5 @@
 import dataclasses
 from abc import ABC, abstractmethod
-from direction import Direction
 import enum
 from typing import Protocol
 
