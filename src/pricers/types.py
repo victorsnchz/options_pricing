@@ -9,4 +9,5 @@ class Market:
     div: float = 0.0
     vol: float | None = None
     today: dt.date
+    basis: str = 'ACT/365'
 
