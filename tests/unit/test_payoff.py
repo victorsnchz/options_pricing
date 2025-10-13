@@ -4,6 +4,25 @@ import sys
 sys.path.append('src')
 from src.payoff import PayoffFactory, Direction, PayoffType, VanillaPayoff, PayoffContext
 
+class TestPayoffContext(unittest.TestCase):
+
+    def test_valid_inputs_payoff_context(self):
+
+        with self.assertRaises(TypeError):
+            payoff_cxt = PayoffContext('10', None)
+
+        with self.assertRaises(ValueError):
+            payoff_cxt = PayoffContext(-1.0, None)
+
+        with self.assertRaises(TypeError):
+            payoff_cxt = PayoffContext(10.0, [1.0])
+
+        with self.assertRaises(TypeError):
+            payoff_cxt = PayoffContext(10.0, ('1'))
+
+        with self.assertRaises(ValueError):
+            payoff_cxt = PayoffContext(10.0, (10.0, 0.0, -1.0))
+
 class TestPayoffFactory(unittest.TestCase):
 
     @classmethod
