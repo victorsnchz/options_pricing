@@ -9,6 +9,7 @@ from src.pricers.base import Pricer
 from src.pricers.types import Market, Greeks
 from src.option import Option
 from src.pricers.time_utils import year_fraction
+from src.pricers.factory import PricerFactory, PricerType
 
 class BlackScholesPricer(Pricer):
 
@@ -91,3 +92,7 @@ class BlackScholesPricer(Pricer):
 
     def price_and_greeks(self, option: Option, market: Market) -> tuple[float, Greeks]:
         return self._price_impl(option, market), self.greeks(option, market)
+    
+@PricerFactory.register(PricerType.BLACK_SCHOLES)
+def _make_black_scholes(**kw) -> Pricer:
+    return BlackScholesPricer()
