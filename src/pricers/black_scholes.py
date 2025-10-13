@@ -54,7 +54,7 @@ class BlackScholesPricer(Pricer):
         if tau == 0.0 or sigma == 0.0: 
             return option.payoff.value(PayoffContext(spot=S))
         
-        _, d1, d2, disc_q, disc_r = self.compute_bs_quantities(S, K, r, q, sigma, tau)
+        _, d1, d2, disc_q, disc_r = self.compute_bs_quantities(S, K, tau, r, q, sigma)
 
         if is_call:
             return S * disc_q * norm.cdf(d1) - K * disc_r * norm.cdf(d2)

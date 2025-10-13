@@ -6,9 +6,9 @@ import datetime as dt
 class Market:
     spot: float
     rate: float
+    today: dt.date
     div: float = 0.0
     vol: float | None = None
-    today: dt.date
     basis: str = 'ACT/365'
 
 @dataclass(frozen=True, slots = True)
