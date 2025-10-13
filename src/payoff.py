@@ -1,8 +1,8 @@
 import dataclasses
 from abc import ABC, abstractmethod
-from direction import Direction
 import enum
 from typing import Protocol
+from src.direction import Direction
 
 @dataclasses.dataclass(frozen=True)
 class PayoffContext:
@@ -52,7 +52,7 @@ class _PayoffCtor(Protocol):
 
 class PayoffFactory:
 
-    _registry = dict[PayoffType, _PayoffCtor] = {}
+    _registry: dict[PayoffType, _PayoffCtor] = {}
 
     @classmethod
     def register(cls, key: PayoffType):
