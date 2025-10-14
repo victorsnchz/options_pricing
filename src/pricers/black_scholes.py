@@ -11,6 +11,24 @@ from src.option import Option
 from src.pricers.time_utils import year_fraction
 from src.pricers.factory import PricerFactory, PricerType
 
+@dataclass(frozen = True, slots = True)
+class BSParameters:
+    S: float
+    K: float
+    r: float
+    q: float
+    tau: float
+    is_call: bool
+    sigma: float | None = None
+
+@dataclass(frozen = True, slots = True)
+class BSQtys:
+    sig_sqrt_t: float
+    d1: float
+    d2: float
+    disc_q: float
+    disc_r: float
+
 class BlackScholesPricer(Pricer):
 
     def is_supported(self, option: Option) -> bool:
@@ -19,7 +37,7 @@ class BlackScholesPricer(Pricer):
             isinstance(option.payoff, VanillaPayoff) 
         )
     
-    def get_bs_inputs(self, option: Option, market: Market) -> tuple[float]:
+    def get_bs_inputs(self, option: Option, market: Market) -> BSParameters:
 
         if market.today is None:
             raise ValueError("BlackScholesPricer: Market.today is required to compute time to expiry.")
@@ -31,36 +49,48 @@ class BlackScholesPricer(Pricer):
         K = float(option.strike)
         r = float(market.rate)
         q = float(market.div)
-        sigma = float(market.vol)
         tau = max(0.0, year_fraction(market.today, option.exercise.expiry, market.basis))
         is_call = (option.direction is Direction.CALL)
+        sigma = float(market.vol)
 
-        return S, K, r, q, sigma, tau, is_call
+        return BSParameters(S, K, r, q, tau, is_call, sigma)
     
-    def compute_bs_quantities(self, S: float, K: float, tau: datetime, sigma: float,
-                         r: float, q: float):
+    def compute_bs_quantities(self, params: BSParameters) -> BSQtys:
         
-        sig_sqrt_t = sigma * np.sqrt(tau)
-        d1 = (np.log(S / K) + (r - q + 0.5 * sigma * sigma) * tau) / sig_sqrt_t
-        d2 = d1 - sig_sqrt_t
-        disc_q, disc_r = np.exp(-q * tau), np.exp(-r * tau)
+        sig_sqrt_t = params.sigma * np.sqrt(params.tau)
 
-        return sig_sqrt_t, d1, d2, disc_q, disc_r
+        d1 = (np.log(params.S / params.K) + 
+              (params.r - params.q + 0.5 * params.sigma * params.sigma) 
+              * params.tau) / sig_sqrt_t
+        
+        d2 = d1 - sig_sqrt_t
+        
+        disc_q, disc_r = np.exp(-params.q * params.tau), np.exp(-params.r * params.tau)
+
+        return BSQtys(sig_sqrt_t, d1, d2, disc_q, disc_r)
 
     def _price_impl(self, option: Option, market: Market) -> float:
         
-        S, K, r, q, sigma, tau, is_call = self.get_bs_inputs(option, market)
+        bs_params = self.get_bs_inputs(option, market)
 
         # "immediate" exercise
-        if tau == 0.0 or sigma == 0.0: 
-            return option.payoff.value(PayoffContext(spot=S))
+        if bs_params.tau == 0.0 or bs_params.sigma == 0.0: 
+            return option.payoff.value(PayoffContext(spot=bs_params.S))
         
-        _, d1, d2, disc_q, disc_r = self.compute_bs_quantities(S, K, tau, r, q, sigma)
+        bs_qtys = self.compute_bs_quantities(bs_params.S, bs_params.K, 
+                                             bs_params.tau, bs_params.r, 
+                                             bs_params.q, bs_params.sigma)
 
-        if is_call:
-            return S * disc_q * norm.cdf(d1) - K * disc_r * norm.cdf(d2)
+        if bs_params.is_call:
+            value = (bs_params.S * bs_qtys.disc_q * norm.cdf(bs_qtys.d1)
+                     - bs_params.K * bs_qtys.disc_r * norm.cdf(bs_qtys.d2)
+                     )
         else:
-            return K * disc_r * norm.cdf(-d2) - S * disc_q * norm.cdf(-d1)
+            value = (bs_params.K * bs_qtys.disc_r * norm.cdf(-bs_qtys.d2) 
+                     - bs_params.S * bs_qtys.disc_q * norm.cdf(-bs_qtys.d1)
+                    )
+        
+        return value
         
     def greeks(self, option: Option, market: Market) -> Greeks:
 
