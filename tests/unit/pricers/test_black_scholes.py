@@ -15,7 +15,7 @@ Control test order
 def load_tests(loader, tests, pattern):
     suite = unittest.TestSuite()
     # Choose the class order explicitly:
-    for cls in (TestInputs, TestBSParams, TestAtmCallOption):
+    for cls in (TestInputs, TestBSParams, TestAtmVanillaCall):
         suite.addTests(loader.loadTestsFromTestCase(cls))
     return suite
 
@@ -99,7 +99,7 @@ class TestBSParams(unittest.TestCase):
         
         self.assertEqual(bs_qtys.sig_sqrt_t, np.sqrt(30/365)*bs_params.sigma)
 
-class TestAtmCallOption(unittest.TestCase):
+class TestAtmVanillaCall(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -121,6 +121,20 @@ class TestAtmCallOption(unittest.TestCase):
         value = self.pricer.price(vanilla_eu_call, self.market)
 
         self.assertAlmostEqual(value, 3.063, places = 3)
+
+    def test_greeks(self):
+
+        eu_exercise = exercise.EuropeanExercise(expiry=date(2025, 12, 31))
+        vanilla_eu_call = option.Option(100, eu_exercise, self.vanilla_payoff)
+
+        greeks = self.pricer.greeks(vanilla_eu_call, self.market)
+
+        self.assertAlmostEqual(greeks.delta, .537, places=3)
+        self.assertAlmostEqual(greeks.gamma, .055, places=3)
+        self.assertAlmostEqual(greeks.vega, .114, places=3)
+        self.assertAlmostEqual(greeks.theta, -.054, places=3)
+        self.assertAlmostEqual(greeks.rho, .042, places=3)
+
     
 
 if __name__ == '__main__':
