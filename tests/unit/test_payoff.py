@@ -42,7 +42,7 @@ class TestPayoffVanilla(unittest.TestCase):
         cls.factory = PayoffFactory()
         cls.payoff_context = PayoffContext(100.0, None)
 
-    def test_value_call_vanilla(self):
+    def test_payoff_call_vanilla(self):
         
         direction = Direction.CALL
         payoff = self.factory.create(PayoffType.VANILLA, direction)
@@ -51,7 +51,7 @@ class TestPayoffVanilla(unittest.TestCase):
         self.assertEqual(payoff.value(strike=101.0, ctx = self.payoff_context), 0)
         self.assertEqual(payoff.value(strike=99.0, ctx = self.payoff_context), 1.0)
 
-    def test_value_put_vanilla(self):
+    def test_payoff_put_vanilla(self):
         
         direction = Direction.PUT
         payoff = self.factory.create(PayoffType.VANILLA, direction)
