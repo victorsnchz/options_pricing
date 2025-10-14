@@ -1,5 +1,3 @@
-IN PROGRESS
-
 Implementing a production-grade option pricer to fit into 
 - backtester
 - portfolio tracking system
