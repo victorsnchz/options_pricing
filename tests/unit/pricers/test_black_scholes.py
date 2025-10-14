@@ -172,6 +172,17 @@ class TestAtmVanillaPut(unittest.TestCase):
         self.assertAlmostEqual(greeks.theta, -.041, places=2)
         self.assertAlmostEqual(greeks.rho, -.041, places=2)
 
+    def test_implied_vol(self):
+
+        eu_exercise = exercise.EuropeanExercise(expiry=date(2025, 12, 31))
+        vanilla_eu_call = option.Option(100, eu_exercise, self.vanilla_payoff)
+
+        iv = self.pricer.implied_vol(vanilla_eu_call, self.market, target_price=3)
+        self.assertAlmostEqual(.2805, iv, places=3)
+
+
+
+
     
 
 if __name__ == '__main__':
