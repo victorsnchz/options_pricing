@@ -80,16 +80,14 @@ class BlackScholesPricer(Pricer):
         
         bs_qtys = self.compute_bs_quantities(bs_params)
 
-        if bs_params.is_call:
-            value = (bs_params.S * bs_qtys.disc_q * norm.cdf(bs_qtys.d1)
+        value = (bs_params.S * bs_qtys.disc_q * norm.cdf(bs_qtys.d1)
                      - bs_params.K * bs_qtys.disc_r * norm.cdf(bs_qtys.d2)
                     )
-        else:
-            value = (bs_params.K * bs_qtys.disc_r * norm.cdf(-bs_qtys.d2) 
-                     - bs_params.S * bs_qtys.disc_q * norm.cdf(-bs_qtys.d1)
-                    )
+
+        if bs_params.is_call:
+            return value
         
-        return value
+        return value - bs_params.S * bs_qtys.disc_q + bs_params.K * bs_qtys.disc_r
         
     def greeks(self, option: Option, market: Market) -> Greeks:
 
@@ -116,9 +114,13 @@ class BlackScholesPricer(Pricer):
             
             delta = bs_qtys.disc_q * (norm.cdf(bs_qtys.d1) - 1.0)
             
-            theta = None
+            theta = ( -(bs_params.S * bs_params.sigma 
+                        * bs_qtys.disc_q * norm.pdf(bs_qtys.d1)) / (2 * np.sqrt(bs_params.tau))
+                        + bs_params.r * bs_params.K * bs_qtys.disc_r * norm.cdf(bs_qtys.d2)
+                        - bs_params.q * bs_params.S * bs_qtys.disc_q * norm.cdf(bs_qtys.d1)
+                     ) / basis_mapping[market.basis]
             
-            rho = -bs_params.K * bs_params.tau * bs_qtys.disc_r * norm.cdf(bs_qtys.d2)
+            rho = -bs_params.K * bs_params.tau * bs_qtys.disc_r * norm.cdf(bs_qtys.d2) / 100
 
         gamma = (bs_qtys.disc_q * norm.pdf(bs_qtys.d1)) / (bs_params.S * bs_qtys.sig_sqrt_t)
         vega  = bs_qtys.disc_q * bs_params.S * norm.pdf(bs_qtys.d1) * np.sqrt(bs_params.tau) / 100
