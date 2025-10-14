@@ -1,8 +1,9 @@
-from dataclasses import dataclass
+import dataclasses
 from abc import ABC, abstractmethod
 from typing import final
-from src.option import Option
+from scipy.optimize import brentq
 
+from src.option import Option
 from src.pricers.types import Market
 
 class Pricer(ABC):
@@ -26,3 +27,13 @@ class Pricer(ABC):
     
     @abstractmethod
     def _price_impl(option, market) -> float: ...
+
+    def implied_vol(self, option: Option, market: Market, target_price: float, *,
+                    vol_min = 1e-6, vol_max = 10.0, tol: float = 1e-7, 
+                    max_iter = 100) -> float: 
+        
+        def objective(vol: float) -> float:
+            m = dataclasses.replace(market, vol=vol)
+            return self.price(option, m) - target_price
+        
+        return brentq(objective, vol_min, vol_max, xtol=tol, maxiter=max_iter)
