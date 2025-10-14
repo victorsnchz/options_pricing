@@ -75,16 +75,15 @@ class BlackScholesPricer(Pricer):
 
         # "immediate" exercise
         if bs_params.tau == 0.0 or bs_params.sigma == 0.0: 
-            return option.payoff.value(PayoffContext(spot=bs_params.S))
+            return option.payoff.value(bs_params.K, 
+                                       PayoffContext(spot=bs_params.S))
         
-        bs_qtys = self.compute_bs_quantities(bs_params.S, bs_params.K, 
-                                             bs_params.tau, bs_params.r, 
-                                             bs_params.q, bs_params.sigma)
+        bs_qtys = self.compute_bs_quantities(bs_params)
 
         if bs_params.is_call:
             value = (bs_params.S * bs_qtys.disc_q * norm.cdf(bs_qtys.d1)
                      - bs_params.K * bs_qtys.disc_r * norm.cdf(bs_qtys.d2)
-                     )
+                    )
         else:
             value = (bs_params.K * bs_qtys.disc_r * norm.cdf(-bs_qtys.d2) 
                      - bs_params.S * bs_qtys.disc_q * norm.cdf(-bs_qtys.d1)
