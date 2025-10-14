@@ -136,6 +136,15 @@ class TestAtmVanillaCall(unittest.TestCase):
         self.assertAlmostEqual(greeks.rho, .042, places=2)
 
 
+    def test_implied_vol(self):
+
+        eu_exercise = exercise.EuropeanExercise(expiry=date(2025, 12, 31))
+        vanilla_eu_call = option.Option(100, eu_exercise, self.vanilla_payoff)
+
+        iv = self.pricer.implied_vol(vanilla_eu_call, self.market, target_price=3)
+        self.assertAlmostEqual(.2445, iv, places=3)
+
+
 class TestAtmVanillaPut(unittest.TestCase):
 
     @classmethod
@@ -162,15 +171,27 @@ class TestAtmVanillaPut(unittest.TestCase):
     def test_greeks(self):
 
         eu_exercise = exercise.EuropeanExercise(expiry=date(2025, 12, 31))
-        vanilla_eu_call = option.Option(100, eu_exercise, self.vanilla_payoff)
+        vanilla_eu_put = option.Option(100, eu_exercise, self.vanilla_payoff)
 
-        greeks = self.pricer.greeks(vanilla_eu_call, self.market)
+        greeks = self.pricer.greeks(vanilla_eu_put, self.market)
 
         self.assertAlmostEqual(greeks.delta, -.463, places=2)
         self.assertAlmostEqual(greeks.gamma, .055, places=2)
         self.assertAlmostEqual(greeks.vega, .114, places=2)
         self.assertAlmostEqual(greeks.theta, -.041, places=2)
         self.assertAlmostEqual(greeks.rho, -.041, places=2)
+
+    def test_implied_vol(self):
+
+        eu_exercise = exercise.EuropeanExercise(expiry=date(2025, 12, 31))
+        vanilla_eu_put = option.Option(100, eu_exercise, self.vanilla_payoff)
+
+        iv = self.pricer.implied_vol(vanilla_eu_put, self.market, target_price=3)
+        self.assertAlmostEqual(.2805, iv, places=
+                               3)
+
+
+
 
     
 
