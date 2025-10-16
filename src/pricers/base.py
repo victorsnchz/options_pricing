@@ -13,7 +13,7 @@ class Pricer(ABC):
 
     def validate_option_priceable(self, option: Option, market: Market) -> None:
 
-        if not self.is_supported(option):
+        if not self.is_supported(option, market):
             raise NotImplementedError(
                 f"{self.__class__.__name__} cannot price "
                 f"{option.exercise.__class__.__name__} option "
