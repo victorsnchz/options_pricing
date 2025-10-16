@@ -3,13 +3,15 @@ from datetime import datetime
 import numpy as np
 from scipy.stats import norm
 
-from src.exercise import EuropeanExercise
+from src.exercise import EuropeanExercise, AmericanExercise
+from src.option import Option
+from src.direction import Direction
 from src.payoff import VanillaPayoff, Direction, PayoffContext
 from src.pricers.base import Pricer
 from src.pricers.types import Market, Greeks
-from src.option import Option
-from src.pricers.time_utils import year_fraction, basis_mapping
 from src.pricers.factory import PricerFactory, PricerType
+from src.pricers.time_utils import year_fraction, basis_mapping
+
 
 @dataclass(frozen = True, slots = True)
 class BSParameters:
@@ -32,9 +34,18 @@ class BSQtys:
 class BlackScholesPricer(Pricer):
 
     def is_supported(self, option: Option) -> bool:
+
+        is_vanilla_european = ( isinstance(option.exercise, EuropeanExercise) 
+                               and isinstance(option.payoff, VanillaPayoff) 
+                               )
+        
+        is_vanilla_american_call = ( isinstance(option.exercise, AmericanExercise) 
+                                    and isinstance(option.payoff, VanillaPayoff) 
+                                    and isinstance(option.direction, Direction.CALL)
+                                    )
+
         return (
-            isinstance(option.exercise, EuropeanExercise) and 
-            isinstance(option.payoff, VanillaPayoff) 
+            is_vanilla_european or is_vanilla_american_call
         )
     
     def get_bs_inputs(self, option: Option, market: Market) -> BSParameters:
