@@ -33,19 +33,20 @@ class BSQtys:
 
 class BlackScholesPricer(Pricer):
 
-    def is_supported(self, option: Option) -> bool:
+    def is_supported(self, option: Option, market: Market) -> bool:
 
         is_vanilla_european = ( isinstance(option.exercise, EuropeanExercise) 
                                and isinstance(option.payoff, VanillaPayoff) 
                                )
         
-        is_vanilla_american_call = ( isinstance(option.exercise, AmericanExercise) 
+        is_vanilla_american_call_no_div = ( isinstance(option.exercise, AmericanExercise) 
                                     and isinstance(option.payoff, VanillaPayoff) 
                                     and isinstance(option.direction, Direction.CALL)
+                                    and market.div == 0.0
                                     )
 
         return (
-            is_vanilla_european or is_vanilla_american_call
+            is_vanilla_european or is_vanilla_american_call_no_div
         )
     
     def get_bs_inputs(self, option: Option, market: Market) -> BSParameters:

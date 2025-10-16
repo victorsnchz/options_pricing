@@ -9,9 +9,9 @@ from src.pricers.types import Market
 class Pricer(ABC):
 
     @abstractmethod
-    def is_supported(self, option: Option) -> bool: ...
+    def is_supported(self, option: Option, market: Market) -> bool: ...
 
-    def validate_option_priceable(self, option: Option) -> None:
+    def validate_option_priceable(self, option: Option, market: Market) -> None:
 
         if not self.is_supported(option):
             raise NotImplementedError(
@@ -22,7 +22,7 @@ class Pricer(ABC):
 
     @final
     def price(self, option: Option, market: Market) -> float:
-        self.validate_option_priceable(option)
+        self.validate_option_priceable(option, market)
         return self._price_impl(option, market)
     
     @abstractmethod
