@@ -9,11 +9,11 @@ from src.pricers.types import Market
 class Pricer(ABC):
 
     @abstractmethod
-    def is_supported(self, option: Option) -> bool: ...
+    def is_supported(self, option: Option, market: Market) -> bool: ...
 
-    def validate_option_priceable(self, option: Option) -> None:
+    def validate_option_priceable(self, option: Option, market: Market) -> None:
 
-        if not self.is_supported(option):
+        if not self.is_supported(option, market):
             raise NotImplementedError(
                 f"{self.__class__.__name__} cannot price "
                 f"{option.exercise.__class__.__name__} option "
@@ -22,7 +22,7 @@ class Pricer(ABC):
 
     @final
     def price(self, option: Option, market: Market) -> float:
-        self.validate_option_priceable(option)
+        self.validate_option_priceable(option, market)
         return self._price_impl(option, market)
     
     @abstractmethod
