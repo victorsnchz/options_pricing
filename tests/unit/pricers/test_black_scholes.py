@@ -15,7 +15,8 @@ Control test order
 def load_tests(loader, tests, pattern):
     suite = unittest.TestSuite()
     # Choose the class order explicitly:
-    for cls in (TestPriceInputs, TestBSParams, TestAtmVanillaCall, TestAtmVanillaPut):
+    for cls in (TestPriceInputs, TestBSParams, TestAtmVanillaEUCall, TestAtmVanillaPut,
+                TestAtmVanillaAMERCall):
         suite.addTests(loader.loadTestsFromTestCase(cls))
     return suite
 
@@ -173,7 +174,7 @@ class TestBSParams(unittest.TestCase):
         
         self.assertEqual(bs_qtys.sig_sqrt_t, np.sqrt(30/365)*bs_params.sigma)
 
-class TestAtmVanillaCall(unittest.TestCase):
+class TestAtmVanillaEUCall(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -263,6 +264,51 @@ class TestAtmVanillaPut(unittest.TestCase):
         iv = self.pricer.implied_vol(vanilla_eu_put, self.market, target_price=3)
         self.assertAlmostEqual(.2805, iv, places=
                                3)
+        
+class TestAtmVanillaAMERCall(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.pricer = BlackScholesPricer()
+        cls.market = types.Market(spot=100, 
+                                  rate = .05, 
+                                  today = date(2025, 12, 1), 
+                                  div = .0, 
+                                  vol = .25)
+        
+        cls.vanilla_payoff = payoff.VanillaPayoff(direction=payoff.Direction.CALL)
+
+
+    def test_value(self):
+
+        eu_exercise = exercise.EuropeanExercise(expiry=date(2025, 12, 31))
+        vanilla_eu_call = option.Option(100, eu_exercise, self.vanilla_payoff)
+        
+        value = self.pricer.price(vanilla_eu_call, self.market)
+
+        self.assertAlmostEqual(value, 3.063, places = 3)
+
+    def test_greeks(self):
+
+        eu_exercise = exercise.EuropeanExercise(expiry=date(2025, 12, 31))
+        vanilla_eu_call = option.Option(100, eu_exercise, self.vanilla_payoff)
+
+        greeks = self.pricer.greeks(vanilla_eu_call, self.market)
+
+        self.assertAlmostEqual(greeks.delta, .537, places=2)
+        self.assertAlmostEqual(greeks.gamma, .055, places=2)
+        self.assertAlmostEqual(greeks.vega, .114, places=2)
+        self.assertAlmostEqual(greeks.theta, -.054, places=2)
+        self.assertAlmostEqual(greeks.rho, .042, places=2)
+
+
+    def test_implied_vol(self):
+
+        eu_exercise = exercise.EuropeanExercise(expiry=date(2025, 12, 31))
+        vanilla_eu_call = option.Option(100, eu_exercise, self.vanilla_payoff)
+
+        iv = self.pricer.implied_vol(vanilla_eu_call, self.market, target_price=3)
+        self.assertAlmostEqual(.2445, iv, places=3)
 
 
 
