@@ -15,20 +15,20 @@ Control test order
 def load_tests(loader, tests, pattern):
     suite = unittest.TestSuite()
     # Choose the class order explicitly:
-    for cls in (TestInputs, TestBSParams, TestAtmVanillaCall, TestAtmVanillaPut):
+    for cls in (TestPriceInputs, TestBSParams, TestAtmVanillaCall, TestAtmVanillaPut):
         suite.addTests(loader.loadTestsFromTestCase(cls))
     return suite
 
-class TestInputs(unittest.TestCase):
+class TestPriceInputs(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
         cls.pricer = BlackScholesPricer()
         cls.market = types.Market(100, 0, date(2025, 12, 31), 0, 1)
 
-    def test_invalid_price_input_exercise(self):
+    def test_invalid_exercise(self):
 
-        amer_exercise = exercise.ExerciseFactory.create(exercise.ExerciseType.BERMUDAN,
+        bermudan_exercise = exercise.ExerciseFactory.create(exercise.ExerciseType.BERMUDAN,
                                                         dates=(date(2025, 11, 30), )
                                                         )
 
@@ -36,16 +36,16 @@ class TestInputs(unittest.TestCase):
                                              direction=payoff.Direction.CALL
                                              )
 
-        amer_vanilla_option = option.Option(strike = 100.0, 
-                                          exercise = amer_exercise,
+        bermudan_vanilla_option = option.Option(strike = 100.0, 
+                                          exercise = bermudan_exercise,
                                           payoff = vanilla_payoff
                                           )
 
         with self.assertRaises(NotImplementedError):
-            self.pricer.price(amer_vanilla_option, self.market)
+            self.pricer.price(bermudan_vanilla_option, self.market)
 
     @unittest.skip("need to implement more payoff schemes")        
-    def test_invalid_price_input_payoff(self):
+    def test_invalid_payoff(self):
 
         eu_exercise = exercise.EuropeanExercise(expiry=date(2025, 11, 30))
 
@@ -58,6 +58,81 @@ class TestInputs(unittest.TestCase):
 
         with self.assertRaises(NotImplementedError):
             self.pricer.price(amer_vanilla_option, self.market)
+
+    def test_invalid_amer_call_option_non_zero_div(self):
+
+        amer_exercise = exercise.ExerciseFactory.create(exercise.ExerciseType.AMERICAN,
+                                                        start=date(2025, 10, 30),
+                                                        expiry=date(2025, 11, 30)
+                                                        )
+
+        vanilla_payoff = payoff.PayoffFactory.create( payoff.PayoffType.VANILLA,
+                                             direction=payoff.Direction.CALL
+                                             )
+
+        eu_vanilla_option = option.Option(strike = 100.0, 
+                                          exercise = amer_exercise,
+                                          payoff = vanilla_payoff
+                                          )
+        
+        market_non_zero_div = types.Market(100, 0, date(2025, 12, 31), 0.5, 1)
+
+        with self.assertRaises(NotImplementedError):
+            self.pricer.price(eu_vanilla_option, market_non_zero_div)
+
+    def test_invalid_amer_put_option(self):
+
+        amer_exercise = exercise.ExerciseFactory.create(exercise.ExerciseType.AMERICAN,
+                                                        start=date(2025, 10, 30),
+                                                        expiry=date(2025, 11, 30)
+                                                        )
+
+        vanilla_payoff = payoff.PayoffFactory.create( payoff.PayoffType.VANILLA,
+                                             direction=payoff.Direction.PUT
+                                             )
+
+        eu_vanilla_option = option.Option(strike = 100.0, 
+                                          exercise = amer_exercise,
+                                          payoff = vanilla_payoff
+                                          )
+
+        with self.assertRaises(NotImplementedError):
+            self.pricer.price(eu_vanilla_option, self.market)
+        
+    def test_valid_eu_call_option(self):
+
+        eu_exercise = exercise.ExerciseFactory.create(exercise.ExerciseType.EUROPEAN,
+                                                        expiry=date(2025, 11, 30)
+                                                        )
+
+        vanilla_payoff = payoff.PayoffFactory.create( payoff.PayoffType.VANILLA,
+                                             direction=payoff.Direction.CALL
+                                             )
+
+        eu_vanilla_option = option.Option(strike = 100.0, 
+                                          exercise = eu_exercise,
+                                          payoff = vanilla_payoff
+                                          )
+        
+        self.pricer.price(eu_vanilla_option, self.market)
+
+    def test_valid_amer_call_option(self):
+
+        amer_exercise = exercise.ExerciseFactory.create(exercise.ExerciseType.AMERICAN,
+                                                        start=date(2025, 10, 30),
+                                                        expiry=date(2025, 11, 30)
+                                                        )
+
+        vanilla_payoff = payoff.PayoffFactory.create( payoff.PayoffType.VANILLA,
+                                             direction=payoff.Direction.CALL
+                                             )
+
+        eu_vanilla_option = option.Option(strike = 100.0, 
+                                          exercise = amer_exercise,
+                                          payoff = vanilla_payoff
+                                          )
+        
+        self.pricer.price(eu_vanilla_option, self.market)
 
 class TestBSParams(unittest.TestCase):
 
