@@ -28,9 +28,8 @@ class TestInputs(unittest.TestCase):
 
     def test_invalid_price_input_exercise(self):
 
-        amer_exercise = exercise.ExerciseFactory.create(exercise.ExerciseType.AMERICAN,
-                                                        start=date(2024, 12, 31),
-                                                        expiry=date(2025, 11, 30)
+        amer_exercise = exercise.ExerciseFactory.create(exercise.ExerciseType.BERMUDAN,
+                                                        dates=(date(2025, 11, 30), )
                                                         )
 
         vanilla_payoff = payoff.PayoffFactory.create( payoff.PayoffType.VANILLA,
