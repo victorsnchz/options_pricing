@@ -41,7 +41,7 @@ class BlackScholesPricer(Pricer):
         
         is_vanilla_american_call_no_div = ( isinstance(option.exercise, AmericanExercise) 
                                     and isinstance(option.payoff, VanillaPayoff) 
-                                    and isinstance(option.direction, Direction.CALL)
+                                    and option.direction == Direction.CALL
                                     and market.div == 0.0
                                     )
 
