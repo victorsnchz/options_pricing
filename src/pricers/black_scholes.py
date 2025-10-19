@@ -118,8 +118,6 @@ class BlackScholesPricer(Pricer):
         if bs_params.tau == 0.0 or bs_params.sigma == 0.0:
             return Greeks(delta = None, gamma = None, vega = None, theta = None, rho = None)
         
-        bs_params = self.compute_bs_quantities(bs_params)
-        
         if bs_params.is_call:
 
             delta = bs_params.disc_q * norm.cdf(bs_params.d1)
