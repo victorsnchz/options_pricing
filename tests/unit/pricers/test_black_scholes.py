@@ -164,15 +164,8 @@ class TestBSParams(unittest.TestCase):
         self.assertEqual(bs_params.sigma, .25)
         self.assertEqual(bs_params.tau, 30/365)
         self.assertTrue(bs_params.is_call)
-
-    def test_001_bs_quantities(self):
         
-
-        bs_params = self.pricer.get_bs_inputs(self.vanilla_eu_call, self.market)
-        
-        bs_qtys = self.pricer.compute_bs_quantities(bs_params)
-        
-        self.assertEqual(bs_qtys.sig_sqrt_t, np.sqrt(30/365)*bs_params.sigma)
+        self.assertEqual(bs_params.sig_sqrt_t, np.sqrt(30/365)*bs_params.sigma)
 
 class TestAtmVanillaEUCall(unittest.TestCase):
 
