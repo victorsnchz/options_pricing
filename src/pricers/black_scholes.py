@@ -34,12 +34,17 @@ class BSParameters:
     def __post_init__(self):
 
         sig_sqrt_t = self.sigma * np.sqrt(self.tau)
-        d1 = ( np.log(self.S / self.K)
-              + (self.r - self.q + 0.5 * self.sigma**2) * self.tau
-              ) / sig_sqrt_t 
+
+        d1 = d2 = 0.0
         
-        d2 = d1 - sig_sqrt_t
-        
+        if self.tau >=0 and sig_sqrt_t > 0 and self.K > 0:
+
+            d1 = ( np.log(self.S / self.K)
+                + (self.r - self.q + 0.5 * self.sigma**2) * self.tau
+                ) / sig_sqrt_t 
+            
+            d2 = d1 - sig_sqrt_t
+            
         disc_q, disc_r = np.exp(-self.q * self.tau), np.exp(-self.r * self.tau)
 
         object.__setattr__(self, 'sig_sqrt_t', sig_sqrt_t)
