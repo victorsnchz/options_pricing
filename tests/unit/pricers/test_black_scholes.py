@@ -140,9 +140,10 @@ class TestBSParams(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.pricer = BlackScholesPricer()
+
         cls.market = types.Market(spot=100, 
                                   rate = .05, 
-                                  today = date(2025, 12, 1), 
+                                  today = date(2025, 12, 30), 
                                   div = .0, 
                                   vol = .25)
 
@@ -153,19 +154,70 @@ class TestBSParams(unittest.TestCase):
         cls.vanilla_eu_call = option.Option(100, eu_exercise, vanilla_payoff)
 
 
-    def test_000_bs_inputs(self):
-        bs_params = self.pricer.get_bs_inputs(self.vanilla_eu_call,
-                                                                    self.market)
+    def test_0_invalid_tau(self):
+        market = types.Market(spot=100, 
+                                  rate = .05, 
+                                  today = date(2026, 12, 1), 
+                                  div = .0, 
+                                  vol = .25)
+        bs_params = self.pricer.get_bs_inputs(self.vanilla_eu_call, market)
+
+        self.assertEqual(bs_params.d1, 0)
+        self.assertEqual(bs_params.d2, 0)
+
+    def test_10_invalid_strike(self):
+
+        eu_exercise = exercise.EuropeanExercise(expiry=date(2025, 12, 31))
+        
+        vanilla_payoff = payoff.VanillaPayoff(direction=payoff.Direction.CALL)
+        
+        vanilla_eu_call = option.Option(0, eu_exercise, vanilla_payoff)
+        
+        bs_params = self.pricer.get_bs_inputs(vanilla_eu_call, self.market)
+
+        self.assertEqual(bs_params.d1, 0)
+        self.assertEqual(bs_params.d2, 0)
+
+    def test_11_invalid_sigma(self):
+
+        market = types.Market(spot=100, 
+                                  rate = .05, 
+                                  today = date(2026, 12, 1), 
+                                  div = .0, 
+                                  vol = .0)
+        bs_params = self.pricer.get_bs_inputs(self.vanilla_eu_call, market)
+
+        self.assertEqual(bs_params.d1, 0)
+        self.assertEqual(bs_params.d2, 0)
+
+    def test_100_valid_inputs(self):
+
+        bs_params = self.pricer.get_bs_inputs(self.vanilla_eu_call, self.market)
         
         self.assertEqual(bs_params.S, 100)
         self.assertEqual(bs_params.K, 100)
         self.assertEqual(bs_params.r, .05)
         self.assertEqual(bs_params.q, .0)
         self.assertEqual(bs_params.sigma, .25)
-        self.assertEqual(bs_params.tau, 30/365)
+        self.assertEqual(bs_params.tau, 1/365)
         self.assertTrue(bs_params.is_call)
+
+        d1_target = ( np.log(bs_params.S / bs_params.K)
+                + (bs_params.r - bs_params.q + 0.5 * bs_params.sigma**2) * bs_params.tau
+                ) / (np.sqrt(bs_params.tau)*bs_params.sigma)
         
-        self.assertEqual(bs_params.sig_sqrt_t, np.sqrt(30/365)*bs_params.sigma)
+        d2_target = d1_target - (np.sqrt(bs_params.tau)*bs_params.sigma)
+
+        disc_q_target = np.exp(-bs_params.q * bs_params.tau)
+
+        disc_r_target = np.exp(-bs_params.r * bs_params.tau)
+        
+        self.assertEqual(bs_params.sig_sqrt_t, np.sqrt(bs_params.tau)*bs_params.sigma)
+        self.assertEqual(bs_params.d1, d1_target)
+        self.assertEqual(bs_params.d2, d2_target)
+        self.assertEqual(bs_params.disc_q, disc_q_target)
+        self.assertEqual(bs_params.disc_r, disc_r_target)
+
 
 class TestAtmVanillaEUCall(unittest.TestCase):
 

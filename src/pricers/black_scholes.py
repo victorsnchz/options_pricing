@@ -34,12 +34,17 @@ class BSParameters:
     def __post_init__(self):
 
         sig_sqrt_t = self.sigma * np.sqrt(self.tau)
-        d1 = ( np.log(self.S / self.K)
-              + (self.r - self.q + 0.5 * self.sigma**2) * self.tau
-              ) / sig_sqrt_t 
+
+        d1 = d2 = 0.0
         
-        d2 = d1 - sig_sqrt_t
-        
+        if self.tau >=0 and sig_sqrt_t > 0 and self.K > 0:
+
+            d1 = ( np.log(self.S / self.K)
+                + (self.r - self.q + 0.5 * self.sigma**2) * self.tau
+                ) / sig_sqrt_t 
+            
+            d2 = d1 - sig_sqrt_t
+            
         disc_q, disc_r = np.exp(-self.q * self.tau), np.exp(-self.r * self.tau)
 
         object.__setattr__(self, 'sig_sqrt_t', sig_sqrt_t)
@@ -66,6 +71,12 @@ class BlackScholesPricer(Pricer):
             is_vanilla_european or is_vanilla_american_call_no_div
         )
     
+    def is_valid_market_data(self, market) -> bool:
+        
+        if market.vol is None:
+            raise ValueError(f'Must provide a volatility value for ' + 
+                             'Black-Scholes model.')
+
     def get_bs_inputs(self, option: Option, market: Market) -> BSParameters:
 
         """
@@ -76,11 +87,6 @@ class BlackScholesPricer(Pricer):
         delegate checks to model_params?
 
         """
-
-        if market.today is None:
-            raise ValueError("BlackScholesPricer: Market.today is required to compute time to expiry.")
-        if market.vol is None:
-            raise ValueError("BlackScholesPricer: Market.vol is required.")
         
         S = float(market.spot)
         K = float(option.strike)
@@ -91,7 +97,6 @@ class BlackScholesPricer(Pricer):
         sigma = float(market.vol)
 
         return BSParameters(S, K, r, q, tau, is_call, sigma)
-
 
     def _price_impl(self, option: Option, market: Market) -> float:
         
@@ -146,7 +151,6 @@ class BlackScholesPricer(Pricer):
         vega  = bs_params.disc_q * bs_params.S * norm.pdf(bs_params.d1) * np.sqrt(bs_params.tau) / 100
 
         return Greeks(delta, gamma, vega, theta, rho)
-
 
     def price_and_greeks(self, option: Option, market: Market) -> tuple[float, Greeks]:
         return self._price_impl(option, market), self.greeks(option, market)
