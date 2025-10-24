@@ -20,6 +20,9 @@ class Pricer(ABC):
                 f"with {option.payoff.__class__.__name__} payoff."
             )
 
+    @abstractmethod
+    def is_valid_market_data(self, market: Market) -> bool: ...
+
     @final
     def price(self, option: Option, market: Market) -> float:
         self.validate_option_priceable(option, market)
