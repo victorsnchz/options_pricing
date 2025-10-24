@@ -15,12 +15,13 @@ class Market:
     def __post_init__(self) -> None:
 
         if not np.isfinite(self.spot) or self.spot <= 0:
-            raise ValueError(f"Invalid spot value: {self.spot}")
+            raise ValueError(f"Invalid spot value: {self.spot}.")
         
         if self.vol is not None and (not np.isfinite(self.vol) or self.vol < 0):
-            raise ValueError(f"Invalid vol value: {self.vol}")
+            raise ValueError(f"Invalid vol value: {self.vol}.")
         
-        
+        if self.today is None:
+            raise ValueError(f"today value must be provided.")
 
 
 @dataclass(frozen=True, slots = True)
