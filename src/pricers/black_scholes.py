@@ -87,11 +87,6 @@ class BlackScholesPricer(Pricer):
         delegate checks to model_params?
 
         """
-
-        if market.today is None:
-            raise ValueError("BlackScholesPricer: Market.today is required to compute time to expiry.")
-        if market.vol is None:
-            raise ValueError("BlackScholesPricer: Market.vol is required.")
         
         S = float(market.spot)
         K = float(option.strike)
