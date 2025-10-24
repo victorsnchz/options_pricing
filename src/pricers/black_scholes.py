@@ -71,6 +71,12 @@ class BlackScholesPricer(Pricer):
             is_vanilla_european or is_vanilla_american_call_no_div
         )
     
+    def is_valid_market_data(self, market) -> bool:
+        
+        if market.vol is None:
+            raise ValueError(f'Must provide a volatility value for ' + 
+                             'Black-Scholes model.')
+
     def get_bs_inputs(self, option: Option, market: Market) -> BSParameters:
 
         """
@@ -96,7 +102,6 @@ class BlackScholesPricer(Pricer):
         sigma = float(market.vol)
 
         return BSParameters(S, K, r, q, tau, is_call, sigma)
-
 
     def _price_impl(self, option: Option, market: Market) -> float:
         
@@ -151,7 +156,6 @@ class BlackScholesPricer(Pricer):
         vega  = bs_params.disc_q * bs_params.S * norm.pdf(bs_params.d1) * np.sqrt(bs_params.tau) / 100
 
         return Greeks(delta, gamma, vega, theta, rho)
-
 
     def price_and_greeks(self, option: Option, market: Market) -> tuple[float, Greeks]:
         return self._price_impl(option, market), self.greeks(option, market)
